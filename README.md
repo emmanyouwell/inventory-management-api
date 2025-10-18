@@ -18,8 +18,8 @@
 ## Project Setup
 **1. Clone the repository**
 ```bash
-git clone https://github.com/emmanyouwell/backend-assessment.git
-cd backend-assessment
+git clone https://github.com/emmanyouwell/inventory-management-api.git
+cd inventory-management-api
 ```
 **2. Install Dependencies**
 ```bash
