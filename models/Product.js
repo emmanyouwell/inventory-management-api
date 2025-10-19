@@ -23,7 +23,9 @@ const Product = {
                         ) FILTER (WHERE t.id IS NOT NULL),
                         '[]'
                     ) as tags
-                `)
+                `),
+                'p.created_at',
+                'p.updated_at'
             )
             .groupBy('p.id')
             .modify((qb) => {
@@ -41,7 +43,31 @@ const Product = {
 
     async getById(id) {
         // Fetch a single product by ID
-        return db('products').where({ id }).first();
+        return db('products as p')
+            .leftJoin('product_tags as pt', 'p.id', '=', 'pt.product_id')
+            .leftJoin('tags as t', 'pt.tags_id', '=', 't.id')
+            .select(
+                'p.id',
+                'p.name',
+                'p.description',
+                'p.current_stock',
+                db.raw(`
+                COALESCE(
+                    json_agg(
+                        DISTINCT jsonb_build_object(
+                        'id', t.id,
+                        'name', t.name
+                        )
+                    ) FILTER (WHERE t.id IS NOT NULL),
+                    '[]'
+                ) as tags`
+                ),
+                'p.created_at',
+                'p.updated_at'
+            )
+            .where({ 'p.id':id })
+            .groupBy('p.id')
+            .first();
     },
 
     async create(productData) {
