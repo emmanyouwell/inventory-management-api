@@ -276,11 +276,11 @@ DELETE /api/products/1
 
 | Method | Endpoint    | Description                |
 | :----- | :---------- | :------------------------- |
-| GET    | `/tags`     | Get all products           |
-| GET    | `/tags/:id` | Get a single product by ID |
-| POST   | `/tags`     | Create a new product       |
-| PATCH  | `/tags/:id` | Update an existing product |
-| DELETE | `/tags/:id` | Delete a product           |
+| GET    | `/tags`     | Get all tags               |
+| GET    | `/tags/:id` | Get a single tag by ID     |
+| POST   | `/tags`     | Create a new tag           |
+| PATCH  | `/tags/:id` | Update an existing tag     |
+| DELETE | `/tags/:id` | Delete a tag               |
 
 ### Usage
 
