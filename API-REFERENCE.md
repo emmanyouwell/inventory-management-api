@@ -282,6 +282,8 @@ DELETE /api/products/1
 | PATCH  | `/tags/:id` | Update an existing product |
 | DELETE | `/tags/:id` | Delete a product           |
 
+### Usage
+
 ### `GET /tags`
 
 **Request**
