@@ -13,6 +13,8 @@ router.route('/products/:id')
     .patch(updateProduct)
     .delete(deleteProduct)
 
-router.post('/products/:id/stock', createInventoryTransaction);
+router.route('/products/:id/stock')
+.post(createInventoryTransaction)
+
 
 module.exports = router;

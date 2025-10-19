@@ -5,9 +5,7 @@ const AppError = require('../utils/ErrorHandler');
 // POST /products
 exports.createProduct = async (req, res, next) => {
     try {
-        const result = await db.transaction(async (trx) => {
-            return await Product.create(req.body, trx);
-        })
+        const result = await Product.create(req.body);
         res.status(201).json({
             success: true,
             message: 'Product created successfully',
@@ -22,6 +20,9 @@ exports.createProduct = async (req, res, next) => {
 exports.getAllProducts = async (req, res, next) => {
     try {
         const products = await Product.getAll(req.query);
+        if (!products || products.length === 0){
+            throw new AppError('No products found', 404);
+        }
         res.status(200).json({
             success: true,
             message: 'Products fetched successfully',
@@ -53,9 +54,7 @@ exports.getSingleProduct = async (req, res, next) => {
 exports.updateProduct = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const updatedProduct = await db.transaction(async (trx) => {
-            return await Product.update(id, req.body, trx);
-        })
+        const updatedProduct = await Product.update(id, req.body);
         res.status(200).json({
             success: true,
             message: 'Product updated successfully',
@@ -71,10 +70,8 @@ exports.deleteProduct = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const deletedCount = await Product.delete(id);
-        if (deletedCount === 0) {
-            throw new AppError('Product not found', 404);
-        }
+        await Product.delete(id);
+        
         res.status(200).json({
             success: true,
             message: 'Product deleted successfully',

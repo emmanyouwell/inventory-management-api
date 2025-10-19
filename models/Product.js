@@ -26,14 +26,14 @@ const Product = {
                 `)
             )
             .groupBy('p.id')
-            .modify((qb)=>{
-                if (query.name){
+            .modify((qb) => {
+                if (query.name) {
                     qb.where('p.name', 'ilike', `%${query.name}%`)
                 }
                 if (query.tag) {
                     qb.where('t.name', 'ilike', `%${query.tag}%`)
                 }
-                if (query.min_stock){
+                if (query.min_stock) {
                     qb.where('p.current_stock', '>=', query.min_stock)
                 }
             });
@@ -44,44 +44,53 @@ const Product = {
         return db('products').where({ id }).first();
     },
 
-    async create(productData, trx = db) {
+    async create(productData) {
         // Create new product with associated tags
         const { name, description, tags = [] } = productData;
+        return db.transaction(async (trx) => {
+            // Record name and description and return the ID
+            const [product] = await trx('products').insert({ name, description }).returning('*');
 
-        // Record name and description and return the ID
-        const [product] = await trx('products').insert({ name, description }).returning('*');
-
-        if (!product) {
-            throw new AppError('Product creation failed', 500);
-        }
-        // Check if tags exist and associate them with the product
-        if (tags.length > 0) {
-            const existingTags = await trx('tags').whereIn('id', tags);
-
-            if (existingTags.length !== tags.length) {
-                throw new AppError('One or more tags do not exist', 400);
+            if (!product) {
+                throw new AppError('Product creation failed', 500);
             }
+            // Check if tags exist and associate them with the product
+            if (tags.length > 0) {
+                const existingTags = await trx('tags').whereIn('id', tags);
 
-            const productTags = tags.map(tagId => ({
-                product_id: product.id,
-                tags_id: tagId
-            }));
+                if (existingTags.length !== tags.length) {
+                    throw new AppError('One or more tags do not exist', 400);
+                }
 
-            // Insert to product_tags junction table
-            await trx('product_tags').insert(productTags);
-        }
-        return { ...product, tags };
+                const productTags = tags.map(tagId => ({
+                    product_id: product.id,
+                    tags_id: tagId
+                }));
+
+                // Insert to product_tags junction table
+                await trx('product_tags').insert(productTags);
+            }
+            return { ...product, tags };
+        })
+
     },
 
-    async update(id, productData, trx = db) {
+    async update(id, productData) {
         // Update name and description of the product
         const { name, description } = productData;
-        const [updatedProduct] = await trx('products').where({ id }).update({ name, description }).returning('*');
-        return updatedProduct;
+        return await db.transaction(async (trx) => {
+            const [updatedProduct] = await trx('products').where({ id }).update({ name, description }).returning('*');
+            return updatedProduct;
+        })
+
     },
 
     async delete(id) {
         // Delete product by ID
+        const product = await this.getById(id);
+        if (!product) {
+            throw new AppError('Product not found', 404);
+        }
         return db('products').where({ id }).del();
     }
 }

@@ -1,5 +1,6 @@
 const Inventory = require('../models/Inventory');
 
+// POST /products/:id/stock
 exports.createInventoryTransaction = async (req, res, next) => {
     try {
         const {id} = req.params;

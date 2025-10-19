@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const AppError = require('../utils/ErrorHandler');
 
 const Tags = {
     async getAll() {
@@ -6,26 +7,34 @@ const Tags = {
         return db('tags').select('*');
     },
 
-    async getById(id){
+    async getById(id) {
         // Fetch a single tag by ID
-        return db('tags').where({id}).first();
+        return db('tags').where({ id }).first();
     },
 
-    async create(tagData, trx = db){
+    async create(tagData) {
         // Create new tag
-        const [tag] = await trx('tags').insert(tagData).returning('*');
-        return tag;
+        return await db.transaction(async (trx) => {
+            const [tag] = await trx('tags').insert(tagData).returning('*');
+            return tag;
+        })
     },
 
-    async update(id, tagData, trx=db){
+    async update(id, tagData) {
         // Update tag details
-        const [updatedTag] = await trx('tags').where({id}).update(tagData).returning('*');
-        return updatedTag;
+        return await db.transaction(async (trx) => {
+            const [updatedTag] = await trx('tags').where({ id }).update(tagData).returning('*');
+            return updatedTag;
+        });
     },
 
-    async delete(id){
+    async delete(id) {
         // Delete tag by ID
-        return db('tags').where({id}).del();
+        const tag = await this.getById(id);
+        if (!tag){
+            throw new AppError('Tag not found', 404);
+        }
+        return db('tags').where({ id }).del();
     }
 }
 
