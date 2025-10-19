@@ -57,3 +57,10 @@ npm run db:migrate
 ```bash
 npm run db:seed
 ```
+
+**7. Run the server**
+```bash
+npm run start:dev
+```
+
+
