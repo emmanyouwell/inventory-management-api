@@ -4,9 +4,7 @@ const AppError = require('../utils/ErrorHandler');
 // POST /tags
 exports.createTag = async (req, res, next) => {
     try {
-        const result = await db.transaction(async (trx) => {
-            return await Tag.create(req.body, trx);
-        })
+        const result = await Tag.create(req.body);
 
         res.status(201).json({
             success: true,
